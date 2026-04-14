@@ -6,4 +6,5 @@ app.get('/', (req: Request, res: Response) => {
   res.send('API is running...');
 });
 
+
 export default app;
