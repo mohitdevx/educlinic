@@ -1,11 +1,11 @@
 {
-  "name": "bring-me-back-root",
+  "name": "educlinic-root",
   "private": true,
   "scripts": {
-    "install": " pnpm -C client install && pnpm -C server install",
-    "dev": "concurrently \"pnpm -C client dev\" \"pnpm -C server dev\"",
+    "install": " pnpm -C client install && pnpm -C server install && pnpm -C admin-portal install",
+    "dev": "concurrently \"pnpm -C client dev\" \"pnpm -C server dev\" \"pnpm -C admin-portal dev\"",
     "format": "prettier --write .",
-    "lint": "pnpm -C client lint && pnpm -C server lint",
+    "lint": "pnpm -C client lint && pnpm -C server lint && pnpm -C admin-portal lint",
     "lint:root": "eslint ."
   },
   "devDependencies": {
