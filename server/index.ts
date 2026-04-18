@@ -1,8 +1,14 @@
 import app from './src/app.js';
-import dotenv from 'dotenv';
+import { env } from './src/config/env.js';
+import { db } from './src/config/db.js';
+// import { connectRedis } from './src/config/redis.js';
 
-dotenv.config();
+const startAllServices: () => Promise<void> = async () => {
+  Promise.all([db.connect()]);
+};
 
-app.listen(process.env.PORT, () => {
-  console.log(`Server is running on port ${process.env.PORT}`);
+startAllServices().then(() => {
+  app.listen(env.PORT, () => {
+    console.log(`Server is running on port ${env.PORT}`);
+  });
 });

@@ -1,9 +1,8 @@
 import type { Request, Response } from 'express';
-import { prisma } from '../config/db.js';
+import { db } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/token.js';
 import { config } from '../config/index.js';
-
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -13,7 +12,7 @@ export const register = async (req: Request, res: Response) => {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const user = await prisma.user.findUnique({
+    const user = await db.client.user.findUnique({
       where: { email },
     });
 
@@ -23,7 +22,7 @@ export const register = async (req: Request, res: Response) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
-    const newUser = await prisma.user.create({
+    const newUser = await db.client.user.create({
       data: {
         name,
         email,
@@ -51,7 +50,7 @@ export const login=async(req:Request,res:Response)=>{
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const user=await prisma.user.findUnique({
+    const user=await db.client.user.findUnique({
       where:{email}
     })
 
