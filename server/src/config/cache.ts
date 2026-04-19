@@ -115,4 +115,3 @@ export const cache = new cacheManager({
   lruTTL: 5 * 60 * 1000, // 5 minutes
   redisTTL: 60 * 60 * 1000, // 1 hour
 });
-

@@ -3,6 +3,8 @@ import { db } from '../config/db.js';
 import bcrypt from 'bcryptjs';
 import { generateToken } from '../utils/token.js';
 import { config } from '../config/index.js';
+import { cache } from '../config/cache.js';
+import type { User } from '../../generated/prisma/browser.js';
 
 export const register = async (req: Request, res: Response) => {
   try {
@@ -32,55 +34,77 @@ export const register = async (req: Request, res: Response) => {
       },
     });
 
-    const token = await generateToken({id:newUser.id,role:newUser.role});
+    const token = await generateToken({ id: newUser.id, role: newUser.role });
     res.cookie('token', token!, { ...config.cookieOptions });
 
-    res.json({ message: 'User registered successfully', user: { id: newUser.id, name: newUser.name, email: newUser.email, role: newUser.role, schoolCategory: newUser.schoolCategory } });
+    res.json({
+      message: 'User registered successfully',
+      user: {
+        id: newUser.id,
+        name: newUser.name,
+        email: newUser.email,
+        role: newUser.role,
+        schoolCategory: newUser.schoolCategory,
+      },
+    });
   } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Internal Server Error' });
   }
 };
 
-
-export const login=async(req:Request,res:Response)=>{
-  try{
-    const {email,password}=req.body;
-    if(!email || !password){
+export const login = async (req: Request, res: Response) => {
+  try {
+    const { email, password } = req.body;
+    if (!email || !password) {
       return res.status(400).json({ message: 'All fields are required' });
     }
 
-    const user=await db.client.user.findUnique({
-      where:{email}
-    })
+    let user: User | null = await cache.get<User>(email);
 
-    if(!user){
+    if (!user) {
+      user = await db.client.user.findUnique({
+        where: { email },
+      });
+      if (user) {
+        cache.set(email, user);
+      }
+    }
+
+    if (!user) {
       return res.status(404).json({ message: 'Credentials mismatch' });
     }
 
-    const isPasswordValid=await bcrypt.compare(password,user.password);
-    if(!isPasswordValid){
+    const isPasswordValid = await bcrypt.compare(password, user.password);
+    if (!isPasswordValid) {
       return res.status(401).json({ message: 'Credentials mismatch' });
     }
 
-    const token=await generateToken({id:user.id,role:user.role});
+    const token = await generateToken({ id: user.id, role: user.role });
     res.cookie('token', token!, { ...config.cookieOptions });
 
-    res.json({ message: 'User logged in successfully', user: { id: user.id, name: user.name, email: user.email, role: user.role, schoolCategory: user.schoolCategory } });
-
-  }catch(err){
+    res.json({
+      message: 'User logged in successfully',
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+        schoolCategory: user.schoolCategory,
+      },
+    });
+  } catch (err) {
     console.log(err);
     res.status(500).json({ message: 'Internal Server Error' });
   }
-}
+};
 
-
-export const logout=async(req:Request,res:Response)=>{
-  try{
+export const logout = async (req: Request, res: Response) => {
+  try {
     res.clearCookie('token');
-    res.json({message:"User logged out successfully"})
-  }catch(err){
-    console.log(err)
-    res.status(500).json({message:"Internal Server Error"})
+    res.json({ message: 'User logged out successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json({ message: 'Internal Server Error' });
   }
-}
+};

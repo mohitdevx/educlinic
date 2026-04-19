@@ -5,7 +5,7 @@ import morgan from 'morgan';
 
 const app: express.Application = express();
 
-const appMiddleware = [
+const appMiddleware: express.RequestHandler[] = [
   express.json(),
   express.urlencoded({ extended: true }),
   cookieParser(),

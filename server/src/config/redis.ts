@@ -3,7 +3,7 @@ import { env } from './env.js';
 import { logger } from './logger.js';
 
 const redisClient: ReturnType<typeof createClient> = createClient({
-  url: env.REDIS_HOST + ':' + env.REDIS_PORT,
+  url: `redis://${env.REDIS_HOST}:${env.REDIS_PORT}`,
 });
 
 const connectRedis = async (): Promise<void> => {
